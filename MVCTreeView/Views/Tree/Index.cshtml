@@ -1,0 +1,97 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+
+@model IEnumerable<MVCTreeView.Models.Model>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    @*<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+        <script src="@Url.Content("~/Scripts/jquery-3.3.1.min.js")" type="text/javascript"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>*@
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.5/themes/default/style.min.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.5/jstree.min.js"></script>
+
+    <script src="~/Scripts/jquery.treeview.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //code to control depth
+            $('#folders').treeview({ collapsed: false });
+            var getDepth = function (rootFolder) {
+                var $parent = $(rootFolder).parents('ul');
+                var depth = 0;
+                while ($parent.length > 0) {
+                    $parent = $parent.parents('ul');
+                    depth += 1;
+                }
+                return depth;
+            };
+
+            var funcFolderDepth = function (rootFolderUL, maxDepth) {
+                var selectedUL = rootFolderUL;
+                $(selectedUL.children('li')).each(function () {
+                    var Me = $(this);
+                    if (getDepth(Me.parent()) == maxDepth) {
+                        Me.hide();
+                    }
+                    if (Me.children('ul').length > 0) {
+                        var selectedUL = Me.children('ul');
+                        funcFolderDepth(selectedUL, maxDepth);
+                    }
+                });
+            };
+            var depth = @ViewContext.RouteData.Values["id"]+ 1;
+            var selectedUL = $('#folders').find("ul");
+            funcFolderDepth(selectedUL, depth);
+
+        });
+
+    </script>
+
+</head>
+
+<body>
+
+    <div>
+
+        @helper TreeView(IEnumerable<MVCTreeView.Models.Model> items)
+
+        {
+            foreach (var item in items)
+            {
+                <li>
+                    @if (item.IsChild)
+                    {
+                        <span class="leaf" id="@item.Id">@item.Name</span>
+
+                    }
+
+                    else
+                    {
+                        <span class="folder">@item.Name</span>
+                        <ul>
+                            @TreeView(item.List)
+                        </ul>
+                    }
+                </li>
+            }
+
+        }
+        <h1>TreeView App</h1>
+        <ul id="folders" class="filetree treeview-famfamfam">
+            @TreeView(Model)
+        </ul>
+    </div>
+</body>
+</html>
